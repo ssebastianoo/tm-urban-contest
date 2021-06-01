@@ -35,10 +35,8 @@ def index():
             return render_template("layout.html", show_error=True)
     cursor.execute("insert into users (firstName, lastName, birthDate, telephone, email, address, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (first_name, last_name, birth_date, telephone, email, address, user_name, category))
     db.commit()
-
-    telegram = {"grafiche": "https://t.me/joinchat/ty3nnfad2R5jMmJk", "video": "https://t.me/joinchat/Dutt5TvAZDA5M2Y0", "musica": "https://t.me/joinchat/df25lPGIEdswMWZk"}
-
-    return redirect(telegram[category])
+    
+    return redirect(config.telegram[category])
 
 if __name__ == "__main__":
     app.run(port=config.port)
