@@ -1,4 +1,4 @@
-import datetime, mysql.connector, config, os
+import datetime, mysql.connector, config, os, requests, json
 from flask import Flask, render_template, redirect, request
 from werkzeug.utils import secure_filename
 
@@ -35,7 +35,11 @@ def index():
             return render_template("layout.html", show_error=True)
     cursor.execute("insert into users (firstName, lastName, birthDate, telephone, email, address, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (first_name, last_name, birth_date, telephone, email, address, user_name, category))
     db.commit()
-    
+
+    headers = {"Authorization": config.api.key, "Content-Type": "application/json"}
+    data = {"username": user_name, "group": category}
+    requests.post(f"{config.api.url}/telegram", data=json.dumps(data), headers=headers)
+
     return redirect(config.telegram[category])
 
 if __name__ == "__main__":
