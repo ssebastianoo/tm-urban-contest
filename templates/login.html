@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Admin login</title>
+    <style>
+      body {
+        background: #282928;
+        color: white;
+        font-family: monospace;
+        overflow-x: hidden;
+      }
+
+      .container {
+        top: 50%;
+        width: 100%;
+        transform: translateY(-60%);
+        position: absolute;
+        text-align: center;
+      }
+
+      .error {
+        padding: 5px;
+        border-radius: 5px;
+        background: #e17055;
+        color: white;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {% if not success %}
+        <p class="error">password o username errati!</p>
+      {% endif %}
+      <p>Insert password to access admin page</p>
+      <form action="/admin" method="post">
+        <input style="display:none" type="text" name="type" value="login">
+        <input type="text" name="username" value="Admin" placeholder="username" required><br>
+        <input type="password" name="password" placeholder="password" required><br><br>
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+  </body>
+</html>

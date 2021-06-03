@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="it" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Manage tau-marin database">
+    <meta name="keywords" content="JSON Editor, Admin page, tau-marin">
+    <meta name="author" content="ssebastianoo">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tau-marin Admin</title>
+    <style>
+      body {
+        background: #282928;
+        color: white;
+        font-family: monospace;
+      }
+
+      .container {
+        text-align: center;
+      }
+
+      .submit {
+        margin-top: 10px;
+        width: 300px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>tau-marin Admin</h1>
+      <div class="json">
+        <form action="/admin" method="post">
+          <input style="display:none" type="text" name="type" value="admin">
+          <textarea rows="30" cols="50" name="output">
+            {{ json.dumps(data, indent=4) }}
+          </textarea><br>
+          <input class="submit" type="submit">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
