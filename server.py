@@ -18,7 +18,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 utils.check_db(cursor)
 cache_mode = utils.get_data(cursor)["mode"]
-cursor.execute("create table if not exists users (firstName text, lastName text, birthDate text, telephone text, email text, address text, userName text, category text)")
+cursor.execute("create table if not exists users (firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text)")
 db.commit()
 
 @app.route("/votes")
@@ -28,8 +28,11 @@ def check_votes():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+
+    provincie = ['Agrigento', 'Alessandria', 'Ancona', 'Aosta', 'Arezzo', 'Ascoli Piceno', 'Asti', 'Avellino', 'Bari', 'Barletta-Andria-Trani', 'Belluno', 'Benevento', 'Bergamo', 'Biella', 'Bologna', 'Bolzano', 'Brescia', 'Brindisi', 'Cagliari', 'Caltanissetta', 'Campobasso', 'Carbonia-Iglesias', 'Caserta', 'Catania', 'Catanzaro', 'Chieti', 'Como', 'Cosenza', 'Cremona', 'Crotone', 'Cuneo', 'Enna', 'Fermo', 'Ferrara', 'Firenze', 'Foggia', 'Forl�-Cesena', 'Frosinone', 'Genova', 'Gorizia', 'Grosseto', 'Imperia', 'Isernia', 'La Spezia', "L'Aquila", 'Latina', 'Lecce', 'Lecco', 'Livorno', 'Lodi', 'Lucca', 'Macerata', 'Mantova', 'Massa-Carrara', 'Matera', 'Messina', 'Milano', 'Modena', 'Monza e della Brianza', 'Napoli', 'Novara', 'Nuoro', 'Olbia-Tempio', 'Oristano', 'Padova', 'Palermo', 'Parma', 'Pavia', 'Perugia', 'Pesaro e Urbino', 'Pescara', 'Piacenza', 'Pisa', 'Pistoia', 'Pordenone', 'Potenza', 'Prato', 'Ragusa', 'Ravenna', 'Reggio Calabria', 'Reggio Emilia', 'Rieti', 'Rimini', 'Roma', 'Rovigo', 'Salerno', 'Medio Campidano', 'Sassari', 'Savona', 'Siena', 'Siracusa', 'Sondrio', 'Taranto', 'Teramo', 'Terni', 'Torino', 'Ogliastra', 'Trapani', 'Trento', 'Treviso', 'Trieste', 'Udine', 'Varese', 'Venezia', 'Verbano-Cusio-Ossola', 'Vercelli', 'Verona', 'Vibo Valentia', 'Vicenza', 'Viterbo']
+
     if request.method == "GET":
-        return render_template("layout.html", show_error=False)
+        return render_template("layout.html", show_error=False, provincie=provincie)
 
     # file = request.files.get("picture")
     first_name = request.form.get("firstName")
@@ -38,20 +41,22 @@ def index():
     telephone = request.form.get("telephone")
     email = request.form.get("email")
     address = request.form.get("address")
+    city = request.form.get("city")
+    province = request.form.get("province")
     user_name = request.form.get("userName")
     category = request.form.get("category")
 
     for value in [first_name, last_name, birth_date, telephone, email, address, user_name, category]:
         if len(value) == 0:
-            return render_template("layout.html", show_error=True)
-    cursor.execute("insert into users (firstName, lastName, birthDate, telephone, email, address, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (first_name, last_name, birth_date, telephone, email, address, user_name, category))
+            return render_template("layout.html", show_error=True, provincie=provincie)
+    cursor.execute("insert into users (firstName, lastName, birthDate, telephone, email, address, city, province, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category))
     db.commit()
 
     try:
         group = int(category)
     except:
         try:
-            group = config.groups.ids[group]
+            group = config.groups.ids[category]
         except KeyError:
             abort(404, "Group not found")
 
@@ -169,7 +174,7 @@ def on_chat_message(msg):
 
         if msg["from"]["id"] in [vote["user_id"] for vote in votes]:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Conferma', callback_data='overwrite_confirm'), InlineKeyboardButton(text='Annulla', callback_data='overwrite_cancel')]])
-            return bot.sendMessage(chat_id, "Sembra che tu abbia già inviato un file per il concorso, vuoi sovrascriverlo inviandone un altro?", reply_to_message_id=msg["message_id"], reply_markup=keyboard)
+            return bot.sendMessage(chat_id, "Sembra che tu abbia già inviato un file per il concorso, vuoi sovrascriverlo inviandone un altro?\nPerderai i voti raccolti fino ad oggi e la data di consegna (anche il tempo fa la differenza per vincere visto che se ci fossero lavori a pari merito vince chi ha fatto prima l’upload.)", reply_to_message_id=msg["message_id"], reply_markup=keyboard)
 
         if type(file) == list:
             file_id = file[0]["file_id"]
