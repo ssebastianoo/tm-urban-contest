@@ -67,8 +67,8 @@
 	<div class="page page--tm-urban-edition" id="locomotive-scroll">
 		{% include 'shared/header.html' %}
 		<!-- @@include ./shared/header.html -->
-		{% if show_error %}
-			<h3>Assicurati di aver compilato tutti i dati.</h3>
+		{% if error %}
+			<h3>{{ error }}</h3>
 		{% endif %}
 		{% include 'shared/index.html' %}
 		<!-- @@placeholder= main -->

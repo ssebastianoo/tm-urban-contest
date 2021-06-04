@@ -1,4 +1,4 @@
-import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils
+import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.loop import MessageLoop
 from flask import Flask, render_template, redirect, request
@@ -18,7 +18,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 utils.check_db(cursor)
 cache_mode = utils.get_data(cursor)["mode"]
-cursor.execute("create table if not exists users (firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text)")
+cursor.execute("create table if not exists users (fileName text, firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text, parentFirstName text, parentLastName text, parentIdCard int, parentTelephone text, parentEmail text)")
 db.commit()
 
 @app.route("/votes")
@@ -29,12 +29,13 @@ def check_votes():
 @app.route("/", methods=["GET", "POST"])
 def index():
 
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+
     provincie = ['Agrigento', 'Alessandria', 'Ancona', 'Aosta', 'Arezzo', 'Ascoli Piceno', 'Asti', 'Avellino', 'Bari', 'Barletta-Andria-Trani', 'Belluno', 'Benevento', 'Bergamo', 'Biella', 'Bologna', 'Bolzano', 'Brescia', 'Brindisi', 'Cagliari', 'Caltanissetta', 'Campobasso', 'Carbonia-Iglesias', 'Caserta', 'Catania', 'Catanzaro', 'Chieti', 'Como', 'Cosenza', 'Cremona', 'Crotone', 'Cuneo', 'Enna', 'Fermo', 'Ferrara', 'Firenze', 'Foggia', 'Forl�-Cesena', 'Frosinone', 'Genova', 'Gorizia', 'Grosseto', 'Imperia', 'Isernia', 'La Spezia', "L'Aquila", 'Latina', 'Lecce', 'Lecco', 'Livorno', 'Lodi', 'Lucca', 'Macerata', 'Mantova', 'Massa-Carrara', 'Matera', 'Messina', 'Milano', 'Modena', 'Monza e della Brianza', 'Napoli', 'Novara', 'Nuoro', 'Olbia-Tempio', 'Oristano', 'Padova', 'Palermo', 'Parma', 'Pavia', 'Perugia', 'Pesaro e Urbino', 'Pescara', 'Piacenza', 'Pisa', 'Pistoia', 'Pordenone', 'Potenza', 'Prato', 'Ragusa', 'Ravenna', 'Reggio Calabria', 'Reggio Emilia', 'Rieti', 'Rimini', 'Roma', 'Rovigo', 'Salerno', 'Medio Campidano', 'Sassari', 'Savona', 'Siena', 'Siracusa', 'Sondrio', 'Taranto', 'Teramo', 'Terni', 'Torino', 'Ogliastra', 'Trapani', 'Trento', 'Treviso', 'Trieste', 'Udine', 'Varese', 'Venezia', 'Verbano-Cusio-Ossola', 'Vercelli', 'Verona', 'Vibo Valentia', 'Vicenza', 'Viterbo']
 
     if request.method == "GET":
-        return render_template("layout.html", show_error=False, provincie=provincie)
+        return render_template("layout.html", error=None, provincie=provincie, today=today)
 
-    # file = request.files.get("picture")
     first_name = request.form.get("firstName")
     last_name = request.form.get("lastName")
     birth_date = request.form.get("birthDate")
@@ -45,11 +46,37 @@ def index():
     province = request.form.get("province")
     user_name = request.form.get("userName")
     category = request.form.get("category")
+    file = request.files.get("picture")
 
     for value in [first_name, last_name, birth_date, telephone, email, address, user_name, category]:
         if len(value) == 0:
-            return render_template("layout.html", show_error=True, provincie=provincie)
-    cursor.execute("insert into users (firstName, lastName, birthDate, telephone, email, address, city, province, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category))
+            return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
+
+    if not file:
+        return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
+
+    if category == "null":
+        print("oof")
+        return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
+
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid1().int}.{ext}"
+    file.save(f"static/selfies/{filename}")
+
+    time = datetime.datetime.strptime(birth_date, "%Y-%m-%d")
+    if (datetime.datetime.now() - time).days / 365 < 18:
+        parent_first_name = request.form.get("parentFirstName")
+        parent_last_name = request.form.get("parentLastName")
+        parent_id_card = request.form.get("parentIdCard")
+        parent_telephone = request.form.get("parentTelephone")
+        parent_email = request.form.get("parentEmail")
+
+        for value in [parent_first_name, parent_last_name, parent_id_card, parent_telephone, parent_email]:
+            if len(value) == 0:
+                return render_template("layout.html", error="Abbiamo notato che sei minorenne, perfavore compila la patria potestà", provincie=provincie, today=today)
+        cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category, parentFirstName, parentLastName, parentIdCard, parentTelephone, parentEmail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category, parent_first_name, parent_last_name, int(parent_id_card), parent_telephone, parent_email))
+    else:
+        cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category))
     db.commit()
 
     try:
@@ -58,7 +85,7 @@ def index():
         try:
             group = config.groups.ids[category]
         except KeyError:
-            abort(404, "Group not found")
+            return 404, "Group not found"
 
     data = utils.get_data(cursor)
     data["users"][str(user_name).lower()] = {"group": group}

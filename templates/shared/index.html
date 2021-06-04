@@ -93,7 +93,7 @@
 			<div class="row">
 				<div class="col-md-10 offset-md-1">
 					<div class="title" urban-enter>Metti alla prova la tua creatività, iscriviti ora!</div>
-					<form id="urban-form" action="/" method="post" class="group--form" urban-form>
+					<form id="urban-form" action="/" method="post" enctype="multipart/form-data" class="group--form" urban-form>
 						<div class="steps--form">
 							<div class="steps__item stagger--childs" id="step-0">
 								<div class="count">
@@ -133,7 +133,7 @@
 										</div>
 										<div class="group--control">
 											<label for="birthDate">Data di nascita*</label>
-											<input type="date" class="control" id="birthDate" name="birthDate" required />
+											<input type="date" max="{{today}}" class="control" id="birthDate" name="birthDate" required />
 										</div>
 										<div class="group--control">
 											<label for="telephone">Telefono*</label>
@@ -199,7 +199,7 @@
 										</div>
 										<div class="group--control">
 											<label for="parentIdCard">Documento d'identità*</label>
-											<input type="text" class="control" id="parentIdCard" name="parentIdCard" required />
+											<input type="number" class="control" id="parentIdCard" name="parentIdCard" required />
 										</div>
 										<div class="group--control">
 											<label for="parentTelephone">Telefono*</label>
