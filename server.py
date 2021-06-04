@@ -5,6 +5,7 @@ from flask import Flask, render_template, redirect, request
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
 bot = telepot.Bot(config.bot.token)
 auth_key = config.api.key
 
@@ -20,6 +21,15 @@ utils.check_db(cursor)
 cache_mode = utils.get_data(cursor)["mode"]
 cursor.execute("create table if not exists users (fileName text, firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text, parentFirstName text, parentLastName text, parentIdCard int, parentTelephone text, parentEmail text)")
 db.commit()
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "Non ho trovato la pagina che cercavi"
+
+@app.errorhandler(413)
+def file_too_large(e):
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    return render_template("layout.html", error="Il file caricato supera i 64MB!", provincie=provincie, today=today)
 
 @app.route("/votes")
 def check_votes():
