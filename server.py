@@ -9,18 +9,16 @@ app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
 bot = telepot.Bot(config.bot.token)
 auth_key = config.api.key
 
-db = mysql.connector.connect(
+connection = mysql.connector.connect(
   host=config.db.host,
   user=config.db.user,
   password=config.db.password,
   database=config.db.name
 )
+db = utils.DataBase(connection)
 
-cursor = db.cursor()
-utils.check_db(cursor)
-cache_mode = utils.get_data(cursor)["mode"]
-cursor.execute("create table if not exists users (fileName text, firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text, parentFirstName text, parentLastName text, parentIdCard int, parentTelephone text, parentEmail text)")
-db.commit()
+db.check_db()
+cache_mode = db.get_data()["mode"]
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -33,7 +31,7 @@ def file_too_large(e):
 
 @app.route("/votes")
 def check_votes():
-    data = utils.get_data(cursor)["votes"]
+    data = db.get_data()["votes"]
     return render_template("check_votes.html", votes=sorted(data, key=lambda x: x["votes"], reverse=True))
 
 @app.route("/", methods=["GET", "POST"])
@@ -73,6 +71,12 @@ def index():
     filename = f"{uuid.uuid1().int}.{ext}"
     file.save(f"static/selfies/{filename}")
 
+    try:
+        cursor = db.db.cursor()
+    except (AttributeError, MySQLdb.OperationalError):
+        db.connect()
+        cursor = db.db.cursor()
+
     time = datetime.datetime.strptime(birth_date, "%Y-%m-%d")
     if (datetime.datetime.now() - time).days / 365 < 18:
         parent_first_name = request.form.get("parentFirstName")
@@ -87,7 +91,7 @@ def index():
         cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category, parentFirstName, parentLastName, parentIdCard, parentTelephone, parentEmail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category, parent_first_name, parent_last_name, int(parent_id_card), parent_telephone, parent_email))
     else:
         cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category))
-    db.commit()
+    db.db.commit()
 
     try:
         group = int(category)
@@ -97,22 +101,20 @@ def index():
         except KeyError:
             return 404, "Group not found"
 
-    data = utils.get_data(cursor)
+    data = db.get_data()
     data["users"][str(user_name).lower()] = {"group": group}
-    utils.update_data(cursor, db, data)
+    db.update_data(data)
 
     return redirect(config.groups.links[category])
 
 @app.route("/admin", methods=["GET", "POST"])
 def sql_admin():
     if request.method == "GET":
-        """data = utils.get_data(cursor)
-        return render_template("admin.html", data=data, json=json)"""
         return render_template("login.html", success=True)
     elif request.method == "POST":
         if request.form["type"] == "login":
             if request.form["password"] == config.admin_password and request.form["username"].lower() == "admin":
-                data = utils.get_data(cursor)
+                data = db.get_data()
                 return render_template("admin.html", data=data, json=json)
 
             else:
@@ -136,7 +138,7 @@ def sql_admin():
             except:
                 return "Syntax Error"
 
-            utils.update_data(cursor, db, data)
+            db.update_data(data)
             return redirect("/admin")
 
 @app.route("/telegram", methods=["GET", "POST"])
@@ -173,9 +175,9 @@ def users():
         except KeyError:
             abort(404, "Group not found")
 
-    data = utils.get_data(cursor)
+    data = db.get_data()
     data["users"][str(username).lower()] = {"group": group}
-    utils.update_data(cursor, db, data)
+    db.update_data(data)
     return "Done!"
 
 def on_chat_message(msg):
@@ -206,7 +208,7 @@ def on_chat_message(msg):
                 except: pass
                 return
 
-        data = utils.get_data(cursor)
+        data = db.get_data()
         votes = data["votes"]
 
         if msg["from"]["id"] in [vote["user_id"] for vote in votes]:
@@ -233,7 +235,7 @@ def on_chat_message(msg):
 
         print(data)
 
-        utils.update_data(cursor, db, data)
+        db.update_data(data)
 
     else:
         if cache_mode == "media":
@@ -271,15 +273,15 @@ def on_chat_message(msg):
             except: return bot.sendMessage(chat_id, "ID di un gruppo non valido", reply_to_message_id=msg["message_id"])
 
             # db = sqlite3.connect(config.db_path)
-            data = utils.get_data(cursor)
+            data = db.get_data()
             users = data["users"]
             users[username] = {"group": group}
-            utils.update_data(cursor, db, data)
+            db.update_data(data)
             return bot.sendMessage(chat_id, f"@{username} ammesso al gruppo", reply_to_message_id=msg["message_id"])
 
     elif text.startswith("/leaderboard"):
         # db = sqlite3.connect(config.db_path)
-        data = utils.get_data(cursor)["votes"]
+        data = db.get_data()["votes"]
         # db.close()
         lb = sorted(data, key=lambda x : x["votes"], reverse=True)
         res = ""
@@ -332,7 +334,7 @@ def on_callback_query(msg):
         if from_id == msg["message"]["reply_to_message"]["from"]["id"]:
             return bot.answerCallbackQuery(query_id, text="Non puoi votarti da solo!", show_alert=True)
 
-        data = utils.get_data(cursor)
+        data = db.get_data()
         user_votes = data["user_votes"]
         votes = data["votes"]
         vote = [v for v in votes if v["chat_id"] == msg["message"]["chat"]["id"] and v["message_id"] == msg["message"]["reply_to_message"]["message_id"]][0]
@@ -353,7 +355,7 @@ def on_callback_query(msg):
 
         actual_votes = vote["votes"]
 
-        utils.update_data(cursor, db, data)
+        db.update_data(data)
 
         text = f"Vota @{msg['message']['reply_to_message']['from']['username']}\n\nVoti: {actual_votes}"
 
@@ -367,9 +369,9 @@ def on_callback_query(msg):
 
         mode = query_data[5:]
         cache_mode = mode
-        data = utils.get_data(cursor)
+        data = db.get_data()
         data["mode"] = mode
-        utils.update_data(cursor, db, data)
+        db.update_data(data)
 
         bot.editMessageText((msg["message"]["chat"]["id"], msg["message"]["message_id"]), f"Modalità aggiornata a *{cache_mode}*!", parse_mode="Markdown")
 
@@ -386,7 +388,7 @@ def on_callback_query(msg):
             else:
                 file = None
 
-        data = utils.get_data(cursor)
+        data = db.get_data()
         votes = data["votes"]
         vote_to_delete = [vote for vote in votes if vote["user_id"] == msg["message"]["reply_to_message"]["from"]["id"]][0]
         votes.remove(vote_to_delete)
@@ -413,7 +415,7 @@ def on_callback_query(msg):
         vote = {'chat_id': msg["message"]["chat"]["id"], 'message_id': msg["message"]["reply_to_message"]['message_id'], "vote_id": vote_message["message_id"], 'votes': 0, "users": [], "user_id": msg["message"]["reply_to_message"]["from"]["id"], "username": msg["message"]["reply_to_message"]["from"]["username"],"file": f"static/{filename}"}
         votes.append(vote)
 
-        utils.update_data(cursor, db, data)
+        db.update_data(data)
 
     elif query_data == "overwrite_cancel":
         if from_id != msg["message"]["reply_to_message"]["from"]["id"]:
