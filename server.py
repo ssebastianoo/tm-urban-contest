@@ -107,9 +107,9 @@ def index():
 
     return redirect(config.groups.links[category])
 
-@app.route("/isAdult", methods=["POST"])
+@app.route("/isAdult/", methods=["POST"])
 def is_adult():
-    raw_date = request.json.get("date")
+    raw_date = request.json.get("birthDate")
     if not raw_date:
         return Response(response="missing date fiels", status=400)
 
