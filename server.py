@@ -69,7 +69,8 @@ def index():
 
     ext = file.filename.split(".")[-1]
     filename = f"{uuid.uuid1().int}.{ext}"
-    file.save(f"static/selfies/{filename}")
+    current_path = os.getcwd()
+    file.save(os.path.join(current_path, f"static/selfies/{filename}"))
 
     try:
         cursor = db.db.cursor()
@@ -225,7 +226,8 @@ def on_chat_message(msg):
         ext = "." + str(bot.getFile(file_id)["file_path"].split(".")[-1])
         filename = file_unique_id + ext
 
-        bot.download_file(file_id, f"static/contest/{filename}")
+        current_path = os.getcwd()
+        bot.download_file(file_id, os.path.join(current_path, f"static/contest/{filename}"))
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
         vote_message = bot.sendMessage(chat_id, f"Vota @{msg['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
