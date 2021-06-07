@@ -1,7 +1,7 @@
 import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.loop import MessageLoop
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, Response
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -107,6 +107,17 @@ def index():
     db.update_data(data)
 
     return redirect(config.groups.links[category])
+
+@app.route("/isAdult", methods=["POST"])
+def is_adult():
+    raw_date = request.json.get("date")
+    if not raw_date:
+        return Response(response="missing date fiels", status=400)
+
+    date = datetime.datetime.strptime(raw_date, "%Y-%m-%d")
+    if (datetime.datetime.now() - date).days / 365 < 18:
+        return {"adult": False}
+    return {"adult": True}
 
 @app.route("/admin", methods=["GET", "POST"])
 def sql_admin():
