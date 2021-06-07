@@ -64,7 +64,6 @@ def index():
         return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
 
     if category == "null":
-        print("oof")
         return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
 
     ext = file.filename.split(".")[-1]
@@ -246,13 +245,10 @@ def on_chat_message(msg):
         vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": msg["from"]["username"],"file": f"static/{filename}"}
         votes.append(vote)
 
-        print(data)
-
         db.update_data(data)
 
     else:
         if cache_mode == "media":
-            print("\n.\n")
             member = bot.getChatMember(chat_id, msg["from"]["id"])
             if member["status"] in ["creator", "administrator"]:
                 pass
