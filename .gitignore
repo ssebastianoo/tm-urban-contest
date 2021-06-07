@@ -3,3 +3,4 @@ config.py
 static/selfies/
 static/contest/
 static/img/landing.mp4
+start.sh
