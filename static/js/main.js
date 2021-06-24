@@ -1403,7 +1403,7 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
         checkRequest: form.value.checkRequest,
         checkField: form.value.checkField
       }, form.value.step0, form.value.step1, form.value.step2, form.value.step3);
-      HttpService.post$('/', payload).pipe(operators.first()).subscribe(function (_) {
+      HttpService.post$('http://contest.tau-marin.it/', payload).pipe(operators.first()).subscribe(function (_) {
         _this2.success = true;
         window.location.href = window.category.options.find(function (option) {
           return option.value === form.value.step1.category;
