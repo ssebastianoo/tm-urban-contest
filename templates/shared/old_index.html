@@ -1,0 +1,256 @@
+<!-- @@master = ./templates/layout.html { "baseHref": "/tm-urban-contest/" } -->
+<!-- @@block = main-->
+<main class="main">
+
+	<div class="section section--bootcamp">
+		<div class="background"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-10 offset-md-1">
+					<div class="content">
+						<div class="logo" urban-enter>
+							<!-- <img class="image" src="/tm-urban-contest/img/urban-bootcamp-logo.png" /> -->
+							<svg class="icon icon--contest"><use xlink:href="#contest"></use></svg>
+						</div>
+						<div class="title" urban-enter><b>Urban</b> Bootcamp Creative Contest</div>
+						<div class="group--video" urban-video>
+							<div class="aspect">
+								<video src="{{url_for('static', filename='img/landing.mp4')}}" poster="{{url_for('static', filename='img/bootcamp.jpg')}}" preload="metadata" webkit-playsinline="webkit-playsinline" playsinline="true"></video>
+							</div>
+							<button type="button" class="btn btn--play"><span>play</span> <img src="{{url_for('static', filename='img/play.svg')}}" /></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section section--intro">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-10 offset-md-1">
+					<div class="title" urban-enter>C’è una nuova sfida che aspetta chi ha un’inclinazione per il mondo dello skateboarding e una passione per musica, videomaking o arti grafiche.</div>
+					<div class="abstract" urban-enter>È un contest ispirato a <a href="http://dev-taumarin.wslabs.it/urban-edition/" class="red btn--link">tau-marin Urban Edition</a> e realizzato in <b>collaborazione con Venice Freestyle Lab</b>, ragazzi che d’inclinazioni urbane… se ne intendono!</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section section--details">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4 offset-md-2">
+					<div class="title" urban-enter>3 categorie</div>
+					<div class="abstract" urban-enter>Musica, Arti grafiche & Videomaking</div>
+				</div>
+				<div class="col-md-4 offset-md-1">
+					<div class="title" urban-enter>3 super premi in palio</div>
+					<div class="abstract" urban-enter>Uno per ogni categoria</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4 offset-md-2">
+					<div class="title" urban-enter>3 coach d’eccezione</div>
+					<div class="abstract" urban-enter>Ti guideranno nella realizzazione del tuo progetto</div>
+				</div>
+				<div class="col-md-4 offset-md-1">
+					<div class="title" urban-enter>1 giuria di esperti</div>
+					<div class="abstract" urban-enter>Valuterà la creatività degli elaborati</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4 offset-md-2">
+					<div class="title" urban-enter>Menzioni speciali</div>
+					<div class="abstract" urban-enter>Sulle pagine <b class="red">tau-marin</b> per chi sceglie, nel suo contenuto, di interpretare <b class="red">tau-marin</b> e la Urban Edition.</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section section--participate">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-5 offset-md-2">
+					<div class="title" urban-enter>sì, ma come si partecipa?</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-7 offset-md-3 col-10 offset-2">
+					<div class="listing--participate">
+						<div class="listing__item" urban-enter><svg class="icon icon--picture"><use xlink:href="#picture"></use></svg> <span class="label">Carica una tua foto con una tavola da skateboarding in mano.</span></div>
+						<div class="listing__item" urban-enter><svg class="icon icon--form"><use xlink:href="#form"></use></svg> <span class="label">Compila il form e accedi al canale Telegram della categoria che ti interessa.</span></div>
+						<div class="listing__item" urban-enter><svg class="icon icon--team"><use xlink:href="#team"></use></svg> <span class="label">Entra subito in contatto con il tuo team chief. </span></div>
+						<div class="listing__item" urban-enter><svg class="icon icon--idea"><use xlink:href="#idea"></use></svg> <span class="label">Pensa, progetta e crea il tuo progetto.</span></div>
+						<div class="listing__item" urban-enter><svg class="icon icon--wait"><use xlink:href="#wait"></use></svg> <span class="label">Attendi che la giuria scelga il vincitore.</span></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section section--form">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-10 offset-md-1">
+					<div class="title" urban-enter>Metti alla prova la tua creatività, iscriviti ora!</div>
+					<form id="urban-form" action="/" method="post" enctype="multipart/form-data" class="group--form" urban-form>
+						<div class="steps--form">
+							<div class="steps__item stagger--childs" id="step-0">
+								<div class="count">
+									<div class="current">1</div>
+									<div class="of">/</div>
+									<div class="total">3</div>
+								</div>
+								<div class="form--sm">
+									<div class="form__title">Sei anche tu uno skater?</div>
+									<div class="form__abstract">Dimostralo con una foto o un selfie assieme alla tua tavola.</div>
+									<div class="group--control group--control--file">
+										<input type="file" id="picture" name="picture" required />
+										<div class="control">Seleziona il file</div>
+										<button type="button" class="btn btn--file">Carica</button>
+									</div>
+									<div class="group--cta">
+										<button type="button" class="btn btn--next">Next</button>
+									</div>
+								</div>
+							</div>
+							<div class="steps__item stagger--childs" id="step-1">
+								<div class="count">
+									<div class="current">2</div>
+									<div class="of">/</div>
+									<div class="total">3</div>
+								</div>
+								<div class="form--md">
+									<div class="form__title">Compila il form con i tuoi dati</div>
+									<div class="group--controls">
+										<div class="group--control">
+											<label for="firstName">Nome*</label>
+											<input type="text" class="control" id="firstName" name="firstName" required />
+										</div>
+										<div class="group--control">
+											<label for="lastName">Cognome*</label>
+											<input type="text" class="control" id="lastName" name="lastName" required />
+										</div>
+										<div class="group--control">
+											<label for="birthDate">Data di nascita*</label>
+											<input type="date" max="{{today}}" class="control" id="birthDate" name="birthDate" required />
+										</div>
+										<div class="group--control">
+											<label for="telephone">Telefono*</label>
+											<input type="text" class="control" id="telephone" name="telephone" required />
+										</div>
+										<div class="group--control">
+											<label for="email">Email*</label>
+											<input type="text" class="control" id="email" name="email" required />
+										</div>
+										<div class="group--control">
+											<label for="address">Indirizzo*</label>
+											<input type="text" class="control" id="address" name="address" required />
+										</div>
+										<div class="group--control">
+											<label for="city">Città*</label>
+											<input type="text" class="control" id="city" name="city" required />
+										</div>
+										<div class="group--control">
+											<label for="province">Provincia*</label>
+											<select class="control--select" id="province" name="province" required>
+												<option value="null">Seleziona</option>
+												{% for pr in provincie %}
+													<option value="{{ pr.lower() }}">{{ pr }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="group--control">
+											<label for="userName">Username Telegram*</label>
+											<input type="text" class="control" id="userName" name="userName"required />
+										</div>
+										<div class="group--control">
+											<label for="category">Categoria preferita*</label>
+											<select class="control--select" id="category" name="category" required>
+												<option value="null">Seleziona</option>
+												<option value="video">Video</option>
+												<option value="grafica">Grafica</option>
+												<option value="musica">Musica</option>
+											</select>
+										</div>
+									</div>
+									<div class="group--cta">
+										<button type="button" class="btn btn--prev">Indietro</button>
+										<button type="button" class="btn btn--next">Next</button>
+									</div>
+								</div>
+							</div>
+							<div class="steps__item stagger--childs" id="step-2">
+								<div class="count">
+									<div class="current">2</div>
+									<div class="of">/</div>
+									<div class="total">3</div>
+								</div>
+								<div class="form--md">
+									<div class="form__title">Inserisci i dati di chi esercita la patria potestà</div>
+									<div class="group--controls">
+										<div class="group--control">
+											<label for="parentFirstName">Nome*</label>
+											<input type="text" class="control" id="parentFirstName" name="parentFirstName" required />
+										</div>
+										<div class="group--control">
+											<label for="parentLastName">Cognome*</label>
+											<input type="text" class="control" id="parentLastName" name="parentLastName" required />
+										</div>
+										<div class="group--control">
+											<label for="parentIdCard">Documento d'identità*</label>
+											<input type="number" class="control" id="parentIdCard" name="parentIdCard" required />
+										</div>
+										<div class="group--control">
+											<label for="parentTelephone">Telefono*</label>
+											<input type="text" class="control" id="parentTelephone" name="parentTelephone" required />
+										</div>
+										<div class="group--control">
+											<label for="parentEmail">Email*</label>
+											<input type="text" class="control" id="parentEmail" name="parentEmail" required />
+										</div>
+									</div>
+									<div class="group--cta">
+										<button type="button" class="btn btn--prev">Indietro</button>
+										<button type="button" class="btn btn--next">Next</button>
+									</div>
+								</div>
+							</div>
+							<div class="steps__item stagger--childs" id="step-3">
+								<div class="count">
+									<div class="current">3</div>
+									<div class="of">/</div>
+									<div class="total">3</div>
+								</div>
+								<div class="form--sm">
+									<div class="form__title">Benvenuto all’Urban Bootcamp by tau-marin</div>
+									<div class="group--checkbox">
+										<input type="checkbox" class="control" id="rulesChecked" name="rulesChecked" required />
+										<label for="rulesChecked">
+											<svg class="icon icon--checkbox"><use xlink:href="#checkbox"></use></svg>
+											<svg class="icon icon--checkbox-checked"><use xlink:href="#checkbox-checked"></use></svg>
+											<span>Ho preso visione e accetto il <a href="#">Regolamento</a></span>
+										</label>
+									</div>
+									<div class="group--checkbox">
+										<input type="checkbox" class="control" id="privacyChecked" name="privacyChecked" required />
+										<label for="privacyChecked">
+											<svg class="icon icon--checkbox"><use xlink:href="#checkbox"></use></svg>
+											<svg class="icon icon--checkbox-checked"><use xlink:href="#checkbox-checked"></use></svg>
+											<span>Ho preso visione dell'<a href="#">Informativa Privacy</a> e acconsento al trattamento dei dati personali</span>
+										</label>
+									</div>
+									<div class="form__abstract">Clicca sul pulsante Telegram e in bocca al lupo!</div>
+									<div class="group--cta">
+										<button onclick="submitForm()" type="button" class="btn btn--telegram"><svg class="icon icon--telegram"><use xlink:href="#telegram"></use></svg> Entra in Telegram</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+<!-- @@close-->

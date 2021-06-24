@@ -25,3 +25,15 @@ class groups:
     musica = -1
     grafica = -2
     video = -3
+
+class OneTrust:
+    url = "https://privacyportaluatde.onetrust.com/request/v1/consentreceipts"
+    requestInformation = "token"
+    purposes = [
+        {
+            "Id": "abcdef"
+        },
+        {
+            "Id": "12345"
+        }
+    ]

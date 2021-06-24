@@ -1,4 +1,5 @@
-import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid
+import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid, requests, io, base64
+from PIL import Image
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.loop import MessageLoop
 from flask import Flask, render_template, redirect, request, Response
@@ -34,42 +35,45 @@ def check_votes():
     data = db.get_data()["votes"]
     return render_template("check_votes.html", votes=sorted(data, key=lambda x: x["votes"], reverse=True))
 
+@app.route("/test", methods=["POST"])
+def test():
+    picture = request.json.get("picture")
+    base64_string = picture['content'].split(',')[1]
+    image = base64.b64decode(base64_string)
+    img = Image.open(io.BytesIO(image))
+
+    ext = picture["name"].split(".")[-1]
+    filename = f"{uuid.uuid1().int}.{ext}"
+    current_path = os.getcwd()
+    img.save(os.path.join(current_path, f"static/selfies/{filename}"))
+
+    return request.json
+
 @app.route("/", methods=["GET", "POST"])
 def index():
 
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-
-    provincie = ['Agrigento', 'Alessandria', 'Ancona', 'Aosta', 'Arezzo', 'Ascoli Piceno', 'Asti', 'Avellino', 'Bari', 'Barletta-Andria-Trani', 'Belluno', 'Benevento', 'Bergamo', 'Biella', 'Bologna', 'Bolzano', 'Brescia', 'Brindisi', 'Cagliari', 'Caltanissetta', 'Campobasso', 'Carbonia-Iglesias', 'Caserta', 'Catania', 'Catanzaro', 'Chieti', 'Como', 'Cosenza', 'Cremona', 'Crotone', 'Cuneo', 'Enna', 'Fermo', 'Ferrara', 'Firenze', 'Foggia', 'Forl�-Cesena', 'Frosinone', 'Genova', 'Gorizia', 'Grosseto', 'Imperia', 'Isernia', 'La Spezia', "L'Aquila", 'Latina', 'Lecce', 'Lecco', 'Livorno', 'Lodi', 'Lucca', 'Macerata', 'Mantova', 'Massa-Carrara', 'Matera', 'Messina', 'Milano', 'Modena', 'Monza e della Brianza', 'Napoli', 'Novara', 'Nuoro', 'Olbia-Tempio', 'Oristano', 'Padova', 'Palermo', 'Parma', 'Pavia', 'Perugia', 'Pesaro e Urbino', 'Pescara', 'Piacenza', 'Pisa', 'Pistoia', 'Pordenone', 'Potenza', 'Prato', 'Ragusa', 'Ravenna', 'Reggio Calabria', 'Reggio Emilia', 'Rieti', 'Rimini', 'Roma', 'Rovigo', 'Salerno', 'Medio Campidano', 'Sassari', 'Savona', 'Siena', 'Siracusa', 'Sondrio', 'Taranto', 'Teramo', 'Terni', 'Torino', 'Ogliastra', 'Trapani', 'Trento', 'Treviso', 'Trieste', 'Udine', 'Varese', 'Venezia', 'Verbano-Cusio-Ossola', 'Vercelli', 'Verona', 'Vibo Valentia', 'Vicenza', 'Viterbo']
-
     if request.method == "GET":
-        return render_template("layout.html", error=None, provincie=provincie, today=today)
+        return render_template("layout.html")
 
-    first_name = request.form.get("firstName")
-    last_name = request.form.get("lastName")
-    birth_date = request.form.get("birthDate")
-    telephone = request.form.get("telephone")
-    email = request.form.get("email")
-    address = request.form.get("address")
-    city = request.form.get("city")
-    province = request.form.get("province")
-    user_name = request.form.get("userName")
-    category = request.form.get("category")
-    file = request.files.get("picture")
+    first_name = request.json.get("firstName")
+    last_name = request.json.get("lastName")
+    birth_date = request.json.get("birthDate")
+    telephone = request.json.get("telephone")
+    email = request.json.get("email")
+    address = request.json.get("address")
+    city = request.json.get("city")
+    province = request.json.get("province")
+    user_name = request.json.get("userName")
+    category = request.json.get("category")
+    picture = request.json.get("picture")
 
-    for value in [first_name, last_name, birth_date, telephone, email, address, user_name, category]:
-        if len(value) == 0:
-            return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
-
-    if not file:
-        return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
-
-    if category == "null":
-        return render_template("layout.html", error="Assicurati di aver compilato tutti i campi", provincie=provincie, today=today)
-
-    ext = file.filename.split(".")[-1]
+    base64_string = picture['content'].split(',')[1]
+    image = base64.b64decode(base64_string)
+    img = Image.open(io.BytesIO(image))
+    ext = picture["name"].split(".")[-1]
     filename = f"{uuid.uuid1().int}.{ext}"
     current_path = os.getcwd()
-    file.save(os.path.join(current_path, f"static/selfies/{filename}"))
+    img.save(os.path.join(current_path, f"static/selfies/{filename}"))
 
     try:
         cursor = db.db.cursor()
@@ -77,17 +81,13 @@ def index():
         db.connect()
         cursor = db.db.cursor()
 
-    time = datetime.datetime.strptime(birth_date, "%Y-%m-%d")
-    if (datetime.datetime.now() - time).days / 365 < 18:
+    if request.form.get("parentFirstName"):
         parent_first_name = request.form.get("parentFirstName")
         parent_last_name = request.form.get("parentLastName")
         parent_id_card = request.form.get("parentIdCard")
         parent_telephone = request.form.get("parentTelephone")
         parent_email = request.form.get("parentEmail")
 
-        for value in [parent_first_name, parent_last_name, parent_id_card, parent_telephone, parent_email]:
-            if len(value) == 0:
-                return render_template("layout.html", error="Abbiamo notato che sei minorenne, perfavore compila la patria potestà", provincie=provincie, today=today)
         cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category, parentFirstName, parentLastName, parentIdCard, parentTelephone, parentEmail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category, parent_first_name, parent_last_name, int(parent_id_card), parent_telephone, parent_email))
     else:
         cursor.execute("insert into users (fileName, firstName, lastName, birthDate, telephone, email, address, city, province, userName, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (filename, first_name, last_name, birth_date, telephone, email, address, city, province, user_name, category))
@@ -105,7 +105,18 @@ def index():
     data["users"][str(user_name).lower()] = {"group": group}
     db.update_data(data)
 
-    return redirect(config.groups.links[category])
+    body = {"identifier": email, "requestInformation": config.OneTrust.requestInformation, "purposes": config.OneTrust.purposes, "dsDataElements": {"FirstName": first_name, "LastName": last_name}}
+    requests.post(config.OneTrust.url, headers = {"Content-Type": "application/json"}, data=json.dumps(body))
+
+    return Response(status=200, response="Ok")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/regolamento")
+def regolamento():
+    return render_template("regolamento.html")
 
 @app.route("/isAdult/", methods=["POST"])
 def is_adult():

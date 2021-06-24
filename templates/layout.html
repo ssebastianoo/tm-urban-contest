@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="it" xml:lang="it">
 
 <head>
 	<meta charset="utf-8" />
@@ -16,7 +16,7 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="Tau Marin Urban Contest" />
 	<meta property="og:description" content="Tutti i prodotti per l&#039;igiene orale per adulti e bambini. Dal filo interdentale, agli scovolini, al Kit per la cura dei tuoi denti, ovunque tu sia." />
-	<meta property="og:url" content="https://actarian.github.io<!--@@var=baseHref-->" />
+	<meta property="og:url" content="/" />
 	<meta property="og:site_name" content="Tau Marin Urban Contest" />
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:description" content="Il sito ufficiale di tau-marin con tutti i prodotti per la cura dei tuoi denti: dai dentifrici agli spazzolini, dai fili interdentali ai kit di viaggio" />
@@ -59,29 +59,30 @@
 	<!-- <link rel="stylesheet" href="--@@var=baseHref--css/vendors.min.css" /> -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.min.css') }}" />
 	<!-- @@placeholder= css -->
+
+	<!-- Google Tag Manager -->
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-MRPRXTR');</script>
+	<!-- End Google Tag Manager -->
+
 </head>
 
 <body>
-	<!-- @@include ./shared/svg.html -->
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MRPRXTR"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
 	{% include 'shared/svg.html' %}
-	<div class="page page--tm-urban-edition" id="locomotive-scroll">
-		{% include 'shared/header.html' %}
-		<!-- @@include ./shared/header.html -->
-		{% if error %}
-			<h3>{{ error }}</h3>
-		{% endif %}
+	<div class="page page--tm-urban-edition" id="locomotive-scroll" app-component>
+    {% include 'shared/header.html' %}
 		{% include 'shared/index.html' %}
-		<!-- @@placeholder= main -->
 		{% include 'shared/footer.html' %}
-		<!-- @@include ./shared/footer.html -->
 	</div>
-	<!--<script src="--@@var=baseHref--js/vendors.min.js"></script>-->
-	<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/vendors.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/main.min.js') }}"></script>
 	<!-- @@placeholder= js -->
-	<script type="text/javascript">
-		function submitForm() {
-			document.getElementById("urban-form").submit();
-		};
-	</script>
 </body>
 </html>

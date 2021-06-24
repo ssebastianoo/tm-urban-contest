@@ -1,3 +1,4 @@
 flask
 telepota
 mysql-connector-python
+pillow
