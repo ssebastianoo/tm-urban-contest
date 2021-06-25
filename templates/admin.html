@@ -23,6 +23,27 @@
         width: 300px;
         height: 50px;
       }
+
+      table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 1px solid black;
+    text-align: left;
+    padding: 8px;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+    color: black;
+  }
+
+    tr a {
+      color: blue;
+      background: white;
+    }
     </style>
   </head>
   <body>
@@ -36,6 +57,49 @@
           </textarea><br>
           <input class="submit" type="submit">
         </form>
+        <br><br>
+        <div class="sql">
+          <table>
+            <tr>
+              <th>fileName</th>
+              <th>firstName</th>
+              <th>lastName</th>
+              <th>birthDate</th>
+              <th>telephone</th>
+              <th>email</th>
+              <th>address</th>
+              <th>city</th>
+              <th>province</th>
+              <th>userName</th>
+              <th>category</th>
+              <th>parentFirstName</th>
+              <th>parentLastName</th>
+              <th>parentIdCard</th>
+              <th>parentTelephone</th>
+              <th>parentEmail</th>
+            </tr>
+            {% for user in sql %}
+              <tr>
+                <td><a href="/static/selfies/{{user[0]}}.png">{{user[0]}}</a></td>
+                <td>{{user[1]}}</td>
+                <td>{{user[2]}}</td>
+                <td>{{user[3]}}</td>
+                <td>{{user[4]}}</td>
+                <td>{{user[5]}}</td>
+                <td>{{user[6]}}</td>
+                <td>{{user[7]}}</td>
+                <td>{{user[8]}}</td>
+                <td>{{user[9]}}</td>
+                <td>{{user[10]}}</td>
+                <td>{{user[11]}}</td>
+                <td>{{user[12]}}</td>
+                <td>{{user[13]}}</td>
+                <td>{{user[14]}}</td>
+                <td>{{user[15]}}</td>
+              </tr>
+             {% endfor %}
+          </table>
+        </div>
       </div>
     </div>
   </body>

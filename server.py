@@ -136,8 +136,11 @@ def sql_admin():
     elif request.method == "POST":
         if request.form["type"] == "login":
             if request.form["password"] == config.admin_password and request.form["username"].lower() == "admin":
+                cursor = db.db.cursor()
                 data = db.get_data()
-                return render_template("admin.html", data=data, json=json)
+                cursor.execute("select * from users")
+                sql = cursor.fetchall()
+                return render_template("admin.html", data=data, json=json, sql=sql)
 
             else:
                 return render_template("login.html", success=False)
@@ -161,6 +164,7 @@ def sql_admin():
                 return "Syntax Error"
 
             db.update_data(data)
+
             return redirect("/admin")
 
 @app.route("/telegram", methods=["GET", "POST"])
