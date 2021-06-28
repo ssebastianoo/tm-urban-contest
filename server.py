@@ -257,7 +257,7 @@ def on_chat_message(msg):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
         vote_message = bot.sendMessage(chat_id, f"Vota @{msg['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
 
-        vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": msg["from"]["username"],"file": f"static/{filename}"}
+        vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": msg["from"]["username"],"file": f"static/contest/{filename}"}
         votes.append(vote)
 
         db.update_data(data)
