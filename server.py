@@ -274,19 +274,15 @@ def on_chat_message(msg):
 
     text = msg.get("text")
 
-    print(1)
-
     if not text:
         return
 
     elif text.startswith("/intro"):
-        print(2)
+        member = bot.getChatMember(chat_id, msg["from"]["id"])
         if member["status"] in ["creator", "administrator"]:
             pass
         else:
             return
-
-        print(3)
         bot.sendVideo(chat_id, config.groups.welcome[chat_id])
 
     elif text.startswith("/accept"):
