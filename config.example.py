@@ -7,7 +7,6 @@ class bot:
     max_votes = 2
     token = "main bot token"
     welcome_token  = "welcome bot token"
-    welcome_image = "https://a-cdn.com/image-url"
 
 class api:
     url = "http://an.api"
@@ -22,6 +21,7 @@ class db:
 class groups:
     links = {"grafiche": "https://t.me/joinchat/x", "video": "https://t.me/joinchat/y", "musica": "https://t.me/z/df25lPGIEdswMWZk"}
     ids = {"musica": -1, "grafica": -2, "video": -3}
+    welcome = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
     musica = -1
     grafica = -2
     video = -3

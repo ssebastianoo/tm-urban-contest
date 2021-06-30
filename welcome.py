@@ -44,11 +44,13 @@ def on_chat_message(msg):
             if str(member['username']).lower() not in users:
                 if str(member['username']).lower() == config.bot.bot_nick:
                     return
-                return bot.kickChatMember(chat_id, member['id'])
+                bot.kickChatMember(chat_id, member['id'])
+                bot.unbanChatMember(chat_id, member['id'])
+                return
             else:
                 if int(msg["chat"]["id"]) != int(users[str(member["username"]).lower()]["group"]):
                     return bot.kickChatMember(chat_id, member['id'])
-                m = bot.sendVideo(chat_id, config.bot.welcome_image, caption = f"@{member['username']} è entrato/a", reply_to_message_id = msg['message_id'])
+                m = bot.sendVideo(chat_id, config.groups.welcome[msg["chat"]["id"]], caption = f"@{member['username']} è entrato/a", reply_to_message_id = msg['message_id'])
                 asyncio.run(asyncio.sleep(5))
                 return bot.deleteMessage((chat_id, m["message_id"]))
 
