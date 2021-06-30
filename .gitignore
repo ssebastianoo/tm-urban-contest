@@ -2,5 +2,7 @@ __pycache__/
 config.py
 static/selfies/
 static/contest/
+static/selfies-old/
+static/contest-old/
 static/img/landing.mp4
 start.sh
