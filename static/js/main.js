@@ -38,11 +38,21 @@ function _defineProperty(obj, key, value) {
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
+
+  _setPrototypeOf(subClass, superClass);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
 }
 
 function _readOnlyError(name) {
-  throw new Error("\"" + name + "\" is read-only");
+  throw new TypeError("\"" + name + "\" is read-only");
 }var AppComponent = /*#__PURE__*/function (_Component) {
   _inheritsLoose(AppComponent, _Component);
 
@@ -349,6 +359,12 @@ var Environment = /*#__PURE__*/function () {
     return path.indexOf('://') === -1;
   };
 
+  function Environment(options) {
+    if (options) {
+      Object.assign(this, options);
+    }
+  }
+
   _createClass(Environment, [{
     key: "STATIC",
     get: function get() {
@@ -368,12 +384,6 @@ var Environment = /*#__PURE__*/function () {
       }
     }
   }]);
-
-  function Environment(options) {
-    if (options) {
-      Object.assign(this, options);
-    }
-  }
 
   return Environment;
 }();
@@ -585,6 +595,9 @@ LabelPipe.meta = {
 
   _createClass(TitleDirective, [{
     key: "title",
+    get: function get() {
+      return this.title_;
+    },
     set: function set(title) {
       if (this.title_ !== title) {
         this.title_ = title;
@@ -594,9 +607,6 @@ LabelPipe.meta = {
 
         title ? node.setAttribute('title', title) : node.removeAttribute('title');
       }
-    },
-    get: function get() {
-      return this.title_;
     }
   }]);
 
@@ -809,7 +819,7 @@ _defineProperty(KeyboardService, "keys", {});var ControlCustomSelectComponent = 
         _value.push(item.id);
       }
 
-      _value = (_readOnlyError("value"), _value.length ? _value.slice() : null);
+      _value.length ? _value.slice() : null, _readOnlyError("value");
     } else {
       value = item.id; // DropdownDirective.dropdown$.next(null);
     }
@@ -1343,8 +1353,8 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
         parentEmail: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.EmailValidator()])
       }),
       step3: new rxcompForm.FormGroup({
-        rulesChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator()]),
-        privacyChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator()])
+        rulesChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.RequiredTrueValidator()]),
+        privacyChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.RequiredTrueValidator()])
       }),
       checkRequest: window.antiforgery,
       checkField: ''
@@ -1403,7 +1413,7 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
         checkRequest: form.value.checkRequest,
         checkField: form.value.checkField
       }, form.value.step0, form.value.step1, form.value.step2, form.value.step3);
-      HttpService.post$('https://contest.tau-marin.it/', payload).pipe(operators.first()).subscribe(function (_) {
+      HttpService.post$('/', payload).pipe(operators.first()).subscribe(function (_) {
         _this2.success = true;
         window.location.href = window.category.options.find(function (option) {
           return option.value === form.value.step1.category;
