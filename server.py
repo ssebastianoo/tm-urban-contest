@@ -277,6 +277,14 @@ def on_chat_message(msg):
     if not text:
         return
 
+    elif text.startswith("/intro"):
+        if member["status"] in ["creator", "administrator"]:
+            pass
+        else:
+            return
+
+        bot.sendVideo(chat_id, config.groups.welcome[chat_id])
+
     elif text.startswith("/accept"):
         member = bot.getChatMember(chat_id, msg["from"]["id"])
         if member["status"] in ["creator", "administrator"]:
