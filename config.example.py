@@ -23,6 +23,7 @@ class groups:
     ids = {"musica": -1, "grafica": -2, "video": -3}
     welcome = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
     rules = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
+    format = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
     musica = -1
     grafica = -2
     video = -3

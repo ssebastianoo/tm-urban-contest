@@ -285,6 +285,7 @@ def on_chat_message(msg):
             return
         bot.sendVideo(chat_id, config.groups.welcome[chat_id])
         bot.sendVideo(chat_id, config.groups.rules[chat_id])
+        bot.sendVideo(chat_id, config.groups.format[chat_id])
 
     elif text.startswith("/accept"):
         member = bot.getChatMember(chat_id, msg["from"]["id"])
