@@ -22,6 +22,7 @@ class groups:
     links = {"grafiche": "https://t.me/joinchat/x", "video": "https://t.me/joinchat/y", "musica": "https://t.me/z/df25lPGIEdswMWZk"}
     ids = {"musica": -1, "grafica": -2, "video": -3}
     welcome = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
+    rules = {-1: "https://video.mp4", -2: "https://video.mp4", -3: "https://video.mp4"}
     musica = -1
     grafica = -2
     video = -3
