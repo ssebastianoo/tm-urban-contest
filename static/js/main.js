@@ -38,21 +38,11 @@ function _defineProperty(obj, key, value) {
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-
-  _setPrototypeOf(subClass, superClass);
-}
-
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-
-  return _setPrototypeOf(o, p);
+  subClass.__proto__ = superClass;
 }
 
 function _readOnlyError(name) {
-  throw new TypeError("\"" + name + "\" is read-only");
+  throw new Error("\"" + name + "\" is read-only");
 }var AppComponent = /*#__PURE__*/function (_Component) {
   _inheritsLoose(AppComponent, _Component);
 
@@ -359,12 +349,6 @@ var Environment = /*#__PURE__*/function () {
     return path.indexOf('://') === -1;
   };
 
-  function Environment(options) {
-    if (options) {
-      Object.assign(this, options);
-    }
-  }
-
   _createClass(Environment, [{
     key: "STATIC",
     get: function get() {
@@ -384,6 +368,12 @@ var Environment = /*#__PURE__*/function () {
       }
     }
   }]);
+
+  function Environment(options) {
+    if (options) {
+      Object.assign(this, options);
+    }
+  }
 
   return Environment;
 }();
@@ -595,9 +585,6 @@ LabelPipe.meta = {
 
   _createClass(TitleDirective, [{
     key: "title",
-    get: function get() {
-      return this.title_;
-    },
     set: function set(title) {
       if (this.title_ !== title) {
         this.title_ = title;
@@ -607,6 +594,9 @@ LabelPipe.meta = {
 
         title ? node.setAttribute('title', title) : node.removeAttribute('title');
       }
+    },
+    get: function get() {
+      return this.title_;
     }
   }]);
 
@@ -819,7 +809,7 @@ _defineProperty(KeyboardService, "keys", {});var ControlCustomSelectComponent = 
         _value.push(item.id);
       }
 
-      _value.length ? _value.slice() : null, _readOnlyError("value");
+      _value = (_readOnlyError("value"), _value.length ? _value.slice() : null);
     } else {
       value = item.id; // DropdownDirective.dropdown$.next(null);
     }
@@ -1353,8 +1343,8 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
         parentEmail: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.EmailValidator()])
       }),
       step3: new rxcompForm.FormGroup({
-        rulesChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.RequiredTrueValidator()]),
-        privacyChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredValidator(), rxcompForm.Validators.RequiredTrueValidator()])
+        rulesChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredTrueValidator()]),
+        privacyChecked: new rxcompForm.FormControl(null, [rxcompForm.Validators.RequiredTrueValidator()])
       }),
       checkRequest: window.antiforgery,
       checkField: ''
@@ -1383,10 +1373,19 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
 
     if (this.currentStep === 1 && this.isOfAge) {
       this.currentStep = 3;
+      window.dataLayer.push({
+        'event': 'step accettazione benvenuto'
+      });
     } else if (this.currentStep === 1 && !this.isOfAge) {
       this.currentStep = 2;
+      window.dataLayer.push({
+        'event': 'step responsabilita genitoriale'
+      });
     } else if (this.currentStep < 3) {
       this.currentStep++;
+      window.dataLayer.push({
+        'event': 'step form dati'
+      });
     }
 
     group = this.controls["step" + this.currentStep];
