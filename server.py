@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
 bot = telepot.Bot(config.bot.token)
-auth_key = config.api.key
 
 connection = mysql.connector.connect(
   host=config.db.host,

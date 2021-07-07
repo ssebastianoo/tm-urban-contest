@@ -8,10 +8,6 @@ class bot:
     token = "main bot token"
     welcome_token  = "welcome bot token"
 
-class api:
-    url = "http://an.api"
-    key = "abcdef1234"
-
 class db:
     host = "0.0.0.0"
     user = "username"
