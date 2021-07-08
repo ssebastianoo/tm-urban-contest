@@ -1388,36 +1388,19 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
 
     if (this.currentStep === 1 && this.isOfAge) {
       this.currentStep = 3;
-
-      if (window.dataLayer) {
-        window.dataLayer.push({
-          'event': 'step accettazione benvenuto'
-        });
-      }
+      window.dataLayer.push({
+        'event': 'step accettazione benvenuto'
+      });
     } else if (this.currentStep === 1 && !this.isOfAge) {
       this.currentStep = 2;
-
-      if (window.dataLayer) {
-        window.dataLayer.push({
-          'event': 'step responsabilita genitoriale'
-        });
-      }
+      window.dataLayer.push({
+        'event': 'step responsabilita genitoriale'
+      });
     } else if (this.currentStep < 3) {
       this.currentStep++;
-
-      if (this.currentStep === 2) {
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            'event': 'step accettazione benvenuto'
-          });
-        }
-      } else {
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            'event': 'step form dati'
-          });
-        }
-      }
+      window.dataLayer.push({
+        'event': 'step form dati'
+      });
     }
 
     group = this.controls["step" + this.currentStep];
