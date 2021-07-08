@@ -1,5 +1,6 @@
 __pycache__/
 config.py
+config.py.save
 static/selfies/
 static/contest/
 static/selfies-old/
