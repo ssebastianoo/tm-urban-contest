@@ -1383,8 +1383,10 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
 
 
       return;
-    } // console.log('onNext', this.currentStep, this.form);
+    }
 
+    console.log('onNext', this.currentStep, this.form);
+    console.log('onNext-dataLayer', window.dataLayer);
 
     if (this.currentStep === 1 && this.isOfAge) {
       this.currentStep = 3;
