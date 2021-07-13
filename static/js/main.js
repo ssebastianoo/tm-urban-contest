@@ -1496,10 +1496,13 @@ var UrbanFormComponent = /*#__PURE__*/function (_Component) {
         userName: 'jappleseed',
         category: category
       },
+
+      /*
       step3: {
-        rulesChecked: true,
-        privacyChecked: true
+      	rulesChecked: true,
+      	privacyChecked: true,
       },
+      */
       checkRequest: window.antiforgery,
       checkField: ''
     });
