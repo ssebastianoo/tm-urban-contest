@@ -7,7 +7,7 @@ class DataBase:
     def connect(self):
         try:
             self.db = mysql.connector.connect(host=config.db.host, user=config.db.user, password=config.db.password, database=config.db.name)
-        except (MySQLdb.Error, MySQLdb.Warning) as e:
+        except mysql.connector.Error as e:
             print(e)
             self.db = None
         return self.db
@@ -15,7 +15,7 @@ class DataBase:
     def get_data(self):
         try:
             cursor = self.db.cursor()
-        except (AttributeError, MySQLdb.OperationalError):
+        except mysql.connector.Error as e:
             self.connect()
             cursor = self.db.cursor()
         cursor.execute("select data from tau_marin")
@@ -28,7 +28,7 @@ class DataBase:
     def update_data(self, data):
         try:
             cursor = self.db.cursor()
-        except (AttributeError, MySQLdb.OperationalError):
+        except mysql.connector.Error as e:
             self.connect()
             cursor = self.db.cursor()
         cursor.execute("update tau_marin set data=%s", (str(data),))
@@ -37,7 +37,7 @@ class DataBase:
     def check_db(self):
         try:
             cursor = self.db.cursor()
-        except (AttributeError, MySQLdb.OperationalError):
+        except mysql.connector.Error as e:
             self.connect()
             cursor = self.db.cursor()
         cursor.execute("create table if not exists tau_marin (data text)")
@@ -51,7 +51,7 @@ class DataBase:
     def query(self, sql):
         try:
             cursor = self.db.cursor()
-        except (AttributeError, MySQLdb.OperationalError):
+        except mysql.connector.Error as e:
             self.connect()
             cursor = self.db.cursor()
         cursor.execute(sql)
