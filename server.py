@@ -76,7 +76,7 @@ def index():
 
     try:
         cursor = db.db.cursor()
-    except (AttributeError, MySQLdb.OperationalError):
+    except mysql.connector.Error as e:
         db.connect()
         cursor = db.db.cursor()
 

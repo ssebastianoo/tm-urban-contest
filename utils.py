@@ -8,7 +8,9 @@ class DataBase:
         try:
             self.db = mysql.connector.connect(host=config.db.host, user=config.db.user, password=config.db.password, database=config.db.name)
         except mysql.connector.Error as e:
+            print("=========== MYSQL ERROR ===========")
             print(e)
+            print("===================================")
             self.db = None
         return self.db
 
