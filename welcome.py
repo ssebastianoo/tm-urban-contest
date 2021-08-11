@@ -1,6 +1,7 @@
-import telepot, config, mysql.connector, time, ast, asyncio, datetime
+import telepot, config, mysql.connector, time, ast, asyncio, datetime, asyncio, traceback
 from telepot.loop import MessageLoop
 from discord.ext import tasks
+
 
 db = mysql.connector.connect(
   host=config.db.host,
@@ -12,6 +13,29 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS welcome (time text, chat_id varchar(50), message_id varchar(50))")
 db.commit()
+
+@tasks.loop(seconds=5)
+async def check_db_connectivity():
+    global db
+    error = False
+    try:
+        passed = True
+        cursor = db.cursor()
+        cursor.close()
+    except:
+        passed = False
+        try:
+            db = mysql.connector.connect(
+              host=config.db.host,
+              user=config.db.user,
+              password=config.db.password,
+              database=config.db.name
+            )
+        except mysql.connector.Error as e:
+            error = True
+            print("\n")
+            traceback.print_exc()
+            print("\n")
 
 @tasks.loop(seconds=5)
 async def delete_welcome(bot):
@@ -33,6 +57,7 @@ async def delete_welcome(bot):
 
 bot = telepot.Bot(config.bot.welcome_token)
 delete_welcome.start(bot)
+check_db_connectivity.start()
 
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)

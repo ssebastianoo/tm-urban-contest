@@ -1,5 +1,6 @@
 admin_password = "abc"
 port = 1234
+warn_id = 1234
 
 class bot:
     bot_nick = "bot username on telegram"

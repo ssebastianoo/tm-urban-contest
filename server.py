@@ -1,13 +1,43 @@
-import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid, requests, io, base64
+import datetime, mysql.connector, config, os, requests, json, telepot, ast, utils, datetime, uuid, requests, io, base64, asyncio, traceback
 from PIL import Image
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.loop import MessageLoop
 from flask import Flask, render_template, redirect, request, Response
 from werkzeug.utils import secure_filename
+from discord.ext import tasks
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
 bot = telepot.Bot(config.bot.token)
+
+@tasks.loop(seconds=600)
+async def check_db_connectivity(db):
+    error = False
+    try:
+        passed = True
+        cursor = db.db.cursor()
+        cursor.close()
+    except:
+        passed = False
+        try:
+            db.db = mysql.connector.connect(
+              host=config.db.host,
+              user=config.db.user,
+              password=config.db.password,
+              database=config.db.name
+            )
+        except mysql.connector.Error as e:
+            error = True
+            print("\n")
+            traceback.print_exc()
+            print("\n")
+
+    if not passed:
+        if error == False:
+            message = f"`[{datetime.datetime.utcnow().strftime('%x %X UTC')}]` Connectivity test NOT passed, *reconnected*"
+        else:
+            message = f"`[{datetime.datetime.utcnow().strftime('%x %X UTC')}]` Connectivity test NOT passed, *could't reconnect*"
+        bot.sendMessage(config.warn_id, message, parse_mode="Markdown")
 
 connection = mysql.connector.connect(
   host=config.db.host,
@@ -16,8 +46,7 @@ connection = mysql.connector.connect(
   database=config.db.name
 )
 db = utils.DataBase(connection)
-
-db.check_db()
+check_db_connectivity.start(db)
 cache_mode = db.get_data()["mode"]
 
 @app.errorhandler(404)
@@ -461,4 +490,6 @@ MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query})
 print("ready")
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_forever()
     app.run(host="0.0.0.0", port=config.port, debug=config.bot.debug)
