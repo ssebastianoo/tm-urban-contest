@@ -5,7 +5,7 @@ warn_id = 1234
 class bot:
     bot_nick = "bot username on telegram"
     debug = False
-    max_votes = 2
+    max_votes = 9
     token = "main bot token"
     welcome_token  = "welcome bot token"
 

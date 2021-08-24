@@ -5,6 +5,7 @@ from telepot.loop import MessageLoop
 from flask import Flask, render_template, redirect, request, Response
 from werkzeug.utils import secure_filename
 from discord.ext import tasks
+from threading import Thread
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000
@@ -46,6 +47,7 @@ connection = mysql.connector.connect(
   database=config.db.name
 )
 db = utils.DataBase(connection)
+db.check_db()
 check_db_connectivity.start(db)
 cache_mode = db.get_data()["mode"]
 
@@ -79,7 +81,6 @@ def test():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-
     if request.method == "GET":
         return render_template("layout.html")
 
@@ -237,6 +238,10 @@ def users():
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
 
+    if msg.get('text'):
+        if msg['text'].startswith("/id"):
+            bot.sendMessage(chat_id, chat_id, reply_to_message_id=msg["message_id"])
+
     groups = [config.groups.musica, config.groups.grafica, config.groups.video]
 
     if msg["chat"]["id"] not in groups:
@@ -265,7 +270,7 @@ def on_chat_message(msg):
         data = db.get_data()
         votes = data["votes"]
 
-        if msg["from"]["id"] in [vote["user_id"] for vote in votes]:
+        if msg["from"]["id"] in [vote["user_id"] for vote in votes if vote["chat_id"] == chat_id]:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Conferma', callback_data='overwrite_confirm'), InlineKeyboardButton(text='Annulla', callback_data='overwrite_cancel')]])
             return bot.sendMessage(chat_id, "Sembra che tu abbia già inviato un file per il concorso, vuoi sovrascriverlo inviandone un altro?\nPerderai i voti raccolti fino ad oggi e la data di consegna (anche il tempo fa la differenza per vincere visto che se ci fossero lavori a pari merito vince chi ha fatto prima l’upload.)", reply_to_message_id=msg["message_id"], reply_markup=keyboard)
 
@@ -382,9 +387,6 @@ def on_chat_message(msg):
 
         bot.sendMessage(chat_id, f"Modalità attuale: *{mode}*\n\nScegli una delle seguenti modalità:\n*Default*: è possibile inviare sia testo che media.\n*Testo*: è possibile inviare solo testo.\n*Media*: è possibile inviare solo media.", parse_mode="Markdown", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
 
-    elif text.startswith("/id"):
-        bot.sendMessage(chat_id, chat_id, reply_to_message_id=msg["message_id"])
-
 def on_callback_query(msg):
     global cache_mode
     query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
@@ -397,26 +399,21 @@ def on_callback_query(msg):
             return bot.answerCallbackQuery(query_id, text="Non puoi votarti da solo!", show_alert=True)
 
         data = db.get_data()
-        user_votes = data["user_votes"]
         votes = data["votes"]
         vote = [v for v in votes if v["chat_id"] == msg["message"]["chat"]["id"] and v["message_id"] == msg["message"]["reply_to_message"]["message_id"]][0]
 
         if from_id in vote["users"]:
-            user_votes[from_id] -= 1
             vote["votes"] -= 1
             vote["users"].remove(from_id)
 
         else:
-            if not user_votes.get(from_id): user_votes[from_id] = 1
-            else:
-                if user_votes.get(from_id) >= config.bot.max_votes:
-                    return bot.answerCallbackQuery(query_id, text="Hai raggiunto il massimo di voti! Rimuovi qualche voto precedente per votare ancora", show_alert=True)
-                user_votes[from_id] += 1
+            user_votes = len([v for v in votes if from_id in v['users'] and v["chat_id"] == msg["message"]["chat"]["id"]])
+            if user_votes >= config.bot.max_votes:
+                return bot.answerCallbackQuery(query_id, text="Hai raggiunto il massimo di voti! Rimuovi qualche voto precedente per votare ancora", show_alert=True)
             vote["votes"] += 1
             vote["users"].append(from_id)
 
         actual_votes = vote["votes"]
-
         db.update_data(data)
 
         text = f"Vota @{msg['message']['reply_to_message']['from']['username']}\n\nVoti: {actual_votes}"
@@ -452,8 +449,10 @@ def on_callback_query(msg):
 
         data = db.get_data()
         votes = data["votes"]
-        vote_to_delete = [vote for vote in votes if vote["user_id"] == msg["message"]["reply_to_message"]["from"]["id"]][0]
-        votes.remove(vote_to_delete)
+        votes_to_delete = [vote for vote in votes if vote["user_id"] == msg["message"]["reply_to_message"]["from"]["id"] and vote["chat_id"] == msg["message"]["chat"]["id"]]
+        print(votes_to_delete)
+        for vote in votes_to_delete:
+            votes.remove(vote)
 
         if type(file) == list:
             file_id = file[0]["file_id"]
@@ -470,8 +469,10 @@ def on_callback_query(msg):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
         try: bot.deleteMessage((msg["message"]["chat"]["id"], msg["message"]["message_id"]))
         except: pass
-        try: bot.deleteMessage((vote_to_delete["chat_id"], vote_to_delete["vote_id"]))
-        except: pass
+
+        for vote in votes_to_delete:
+            try: bot.deleteMessage((vote["chat_id"], vote["vote_id"]))
+            except: pass
         vote_message = bot.sendMessage(msg["message"]["chat"]["id"], f"Vota @{msg['message']['reply_to_message']['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message"]["reply_to_message"]["message_id"])
 
         vote = {'chat_id': msg["message"]["chat"]["id"], 'message_id': msg["message"]["reply_to_message"]['message_id'], "vote_id": vote_message["message_id"], 'votes': 0, "users": [], "user_id": msg["message"]["reply_to_message"]["from"]["id"], "username": msg["message"]["reply_to_message"]["from"]["username"],"file": f"static/{filename}"}
@@ -487,9 +488,19 @@ def on_callback_query(msg):
 
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
+def run_flask():
+    app.run(host="0.0.0.0", port=config.port, debug=config.bot.debug)
+
+loop = asyncio.get_event_loop()
+
+def start_async_loop():
+    loop.run_forever()
+
+async_loop = Thread(target=start_async_loop)
+async_loop.start()
+
 print("ready")
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_forever()
-    app.run(host="0.0.0.0", port=config.port, debug=config.bot.debug)
+    flask_loop = Thread(target=run_flask)
+    flask_loop.start()

@@ -46,7 +46,7 @@ class DataBase:
         cursor.execute("create table if not exists users (fileName text, firstName text, lastName text, birthDate text, telephone text, email text, address text, city text, province text, userName text, category text, parentFirstName text, parentLastName text, parentIdCard int, parentTelephone text, parentEmail text)")
         data = self.get_data()
         if not data:
-            data = {"votes": [], "user_votes": {}, "users": {}, "mode": "default"}
+            data = {"votes": [], "users": {}, "mode": "default"}
             cursor.execute("insert into tau_marin (data) values (%s)", (str(data),))
         self.db.commit()
 
