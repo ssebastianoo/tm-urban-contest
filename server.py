@@ -235,20 +235,7 @@ def users():
     db.update_data(data)
     return "Done!"
 
-def on_chat_message(msg):
-    content_type, chat_type, chat_id = telepot.glance(msg)
-
-    if msg.get('text'):
-        if msg['text'].startswith("/id"):
-            bot.sendMessage(chat_id, chat_id, reply_to_message_id=msg["message_id"])
-
-    groups = [config.groups.musica, config.groups.grafica, config.groups.video]
-
-    if msg["chat"]["id"] not in groups:
-        if msg["chat"]["type"] == "private":
-            bot.sendMessage(chat_id, "Questo bot funziona solo nei gruppi.", reply_to_message_id=msg["message_id"])
-        return
-
+def gen_vote(bot, msg, chat_id, cache_mode, ow_mode=False, msg_=None):
     for x in ["document", "media", "video", "photo", "animation", "audio"]:
         f = msg.get(x)
         if f:
@@ -270,9 +257,15 @@ def on_chat_message(msg):
         data = db.get_data()
         votes = data["votes"]
 
-        if msg["from"]["id"] in [vote["user_id"] for vote in votes if vote["chat_id"] == chat_id]:
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Conferma', callback_data='overwrite_confirm'), InlineKeyboardButton(text='Annulla', callback_data='overwrite_cancel')]])
-            return bot.sendMessage(chat_id, "Sembra che tu abbia già inviato un file per il concorso, vuoi sovrascriverlo inviandone un altro?\nPerderai i voti raccolti fino ad oggi e la data di consegna (anche il tempo fa la differenza per vincere visto che se ci fossero lavori a pari merito vince chi ha fatto prima l’upload.)", reply_to_message_id=msg["message_id"], reply_markup=keyboard)
+        if ow_mode:
+            votes_to_delete = [vote for vote in votes if vote["user_id"] == msg["from"]["id"] and vote["chat_id"] == chat_id]
+            for vote in votes_to_delete:
+                votes.remove(vote)
+
+        if not ow_mode:
+            if msg["from"]["id"] in [vote["user_id"] for vote in votes if vote["chat_id"] == chat_id]:
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Conferma', callback_data='overwrite_confirm'), InlineKeyboardButton(text='Annulla', callback_data='overwrite_cancel')]])
+                return bot.sendMessage(chat_id, "Sembra che tu abbia già inviato un file per il concorso, vuoi sovrascriverlo inviandone un altro?\nPerderai i voti raccolti fino ad oggi e la data di consegna (anche il tempo fa la differenza per vincere visto che se ci fossero lavori a pari merito vince chi ha fatto prima l’upload.)", reply_to_message_id=msg["message_id"], reply_markup=keyboard)
 
         if type(file) == list:
             file_id = file[0]["file_id"]
@@ -281,14 +274,32 @@ def on_chat_message(msg):
             file_id = file["file_id"]
             file_unique_id = file["file_unique_id"]
 
-        ext = "." + str(bot.getFile(file_id)["file_path"].split(".")[-1])
-        filename = file_unique_id + ext
+        try:
+            ext = "." + str(bot.getFile(file_id)["file_path"].split(".")[-1])
+            filename = file_unique_id + ext
+            pass_download = True
+        except telepot.exception.TelegramError:
+            filename = "MISSING FILE, DOWNLOAD IT YOURSELF"
+            pass_download = False
 
         current_path = os.getcwd()
-        bot.download_file(file_id, os.path.join(current_path, f"static/contest/{filename}"))
+
+        if pass_download:
+            try:
+                bot.download_file(file_id, os.path.join(current_path, f"static/contest/{filename}"))
+            except telepot.exception.TelegramError:
+                filename = "MISSING FILE, DOWNLOAD IT YOURSELF"
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
         vote_message = bot.sendMessage(chat_id, f"Vota @{msg['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
+
+        if ow_mode:
+            try: bot.deleteMessage((chat_id, msg_["message"]["message_id"]))
+            except: pass
+
+            for vote in votes_to_delete:
+                try: bot.deleteMessage((vote["chat_id"], vote["vote_id"]))
+                except: pass
 
         vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": msg["from"]["username"],"file": f"static/contest/{filename}"}
         votes.append(vote)
@@ -304,6 +315,22 @@ def on_chat_message(msg):
                 try: bot.deleteMessage((chat_id, msg["message_id"]))
                 except: pass
                 return
+
+def on_chat_message(msg):
+    content_type, chat_type, chat_id = telepot.glance(msg)
+
+    if msg.get('text'):
+        if msg['text'].startswith("/id"):
+            bot.sendMessage(chat_id, chat_id, reply_to_message_id=msg["message_id"])
+
+    groups = [config.groups.musica, config.groups.grafica, config.groups.video]
+
+    if msg["chat"]["id"] not in groups:
+        if msg["chat"]["type"] == "private":
+            bot.sendMessage(chat_id, "Questo bot funziona solo nei gruppi.", reply_to_message_id=msg["message_id"])
+        return
+
+    gen_vote(bot, msg, chat_id, cache_mode)
 
     text = msg.get("text")
 
@@ -439,47 +466,8 @@ def on_callback_query(msg):
         if from_id != msg["message"]["reply_to_message"]["from"]["id"]:
             return bot.answerCallbackQuery(query_id, text="Questo bottone non è per te!", show_alert=True)
 
-        for x in ["document", "media", "video", "photo", "animation", "audio"]:
-            f = msg["message"]["reply_to_message"].get(x)
-            if f:
-                file = f
-                break
-            else:
-                file = None
-
-        data = db.get_data()
-        votes = data["votes"]
-        votes_to_delete = [vote for vote in votes if vote["user_id"] == msg["message"]["reply_to_message"]["from"]["id"] and vote["chat_id"] == msg["message"]["chat"]["id"]]
-        print(votes_to_delete)
-        for vote in votes_to_delete:
-            votes.remove(vote)
-
-        if type(file) == list:
-            file_id = file[0]["file_id"]
-            file_unique_id = file[0]["file_unique_id"]
-        elif type(file) == dict:
-            file_id = file["file_id"]
-            file_unique_id = file["file_unique_id"]
-
-        ext = "." + str(bot.getFile(file_id)["file_path"].split(".")[-1])
-        filename = file_unique_id + ext
-
-        bot.download_file(file_id, f"static/contest/{filename}")
-
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
-        try: bot.deleteMessage((msg["message"]["chat"]["id"], msg["message"]["message_id"]))
-        except: pass
-
-        for vote in votes_to_delete:
-            try: bot.deleteMessage((vote["chat_id"], vote["vote_id"]))
-            except: pass
-        vote_message = bot.sendMessage(msg["message"]["chat"]["id"], f"Vota @{msg['message']['reply_to_message']['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message"]["reply_to_message"]["message_id"])
-
-        vote = {'chat_id': msg["message"]["chat"]["id"], 'message_id': msg["message"]["reply_to_message"]['message_id'], "vote_id": vote_message["message_id"], 'votes': 0, "users": [], "user_id": msg["message"]["reply_to_message"]["from"]["id"], "username": msg["message"]["reply_to_message"]["from"]["username"],"file": f"static/{filename}"}
-        votes.append(vote)
-
-        db.update_data(data)
-
+        gen_vote(bot, msg["message"]["reply_to_message"], msg["message"]["chat"]["id"], cache_mode, True, msg)
+        
     elif query_data == "overwrite_cancel":
         if from_id != msg["message"]["reply_to_message"]["from"]["id"]:
             return bot.answerCallbackQuery(query_id, text="Questo bottone non è per te!", show_alert=True)
