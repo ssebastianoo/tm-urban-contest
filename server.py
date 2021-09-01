@@ -291,7 +291,8 @@ def gen_vote(bot, msg, chat_id, cache_mode, ow_mode=False, msg_=None):
                 filename = "MISSING FILE, DOWNLOAD IT YOURSELF"
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
-        vote_message = bot.sendMessage(chat_id, f"Vota @{msg['from']['username']}", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
+        name = f"@{msg['from'].get('username')}" if msg['from'].get('username') else msg['from']['first_name']
+        vote_message = bot.sendMessage(chat_id, f"Vota {name}", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
 
         if ow_mode:
             try: bot.deleteMessage((chat_id, msg_["message"]["message_id"]))
@@ -467,7 +468,7 @@ def on_callback_query(msg):
             return bot.answerCallbackQuery(query_id, text="Questo bottone non è per te!", show_alert=True)
 
         gen_vote(bot, msg["message"]["reply_to_message"], msg["message"]["chat"]["id"], cache_mode, True, msg)
-        
+
     elif query_data == "overwrite_cancel":
         if from_id != msg["message"]["reply_to_message"]["from"]["id"]:
             return bot.answerCallbackQuery(query_id, text="Questo bottone non è per te!", show_alert=True)
