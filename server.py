@@ -236,6 +236,7 @@ def users():
     return "Done!"
 
 def gen_vote(bot, msg, chat_id, cache_mode, ow_mode=False, msg_=None):
+
     for x in ["document", "media", "video", "photo", "animation", "audio"]:
         f = msg.get(x)
         if f:
@@ -302,7 +303,7 @@ def gen_vote(bot, msg, chat_id, cache_mode, ow_mode=False, msg_=None):
                 try: bot.deleteMessage((vote["chat_id"], vote["vote_id"]))
                 except: pass
 
-        vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": msg["from"]["username"],"file": f"static/contest/{filename}"}
+        vote = {'chat_id': chat_id, 'message_id': msg['message_id'], "vote_id": vote_message["message_id"],'votes': 0, "users": [], "user_id": msg["from"]["id"], "username": name,"file": f"static/contest/{filename}"}
         votes.append(vote)
 
         db.update_data(data)
@@ -399,6 +400,7 @@ def on_chat_message(msg):
                     v = "vote"
                 else:
                     v = "votes"
+                name = f"@{msg['message']['reply_to_message']['from'].get('username')}" if msg['message']['reply_to_message']['from'].get('username') else msg['message']['reply_to_message']['from']['first_name']
                 res += f"<b>@{member['user']['username']}</b> - <code>{x['votes']}</code> {v}\n"
                 c += 1
             res += "\n"
@@ -414,6 +416,14 @@ def on_chat_message(msg):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Default', callback_data='mode_default'), InlineKeyboardButton(text='Testo', callback_data='mode_testo'), InlineKeyboardButton(text='Media', callback_data='mode_media')]])
 
         bot.sendMessage(chat_id, f"Modalità attuale: *{mode}*\n\nScegli una delle seguenti modalità:\n*Default*: è possibile inviare sia testo che media.\n*Testo*: è possibile inviare solo testo.\n*Media*: è possibile inviare solo media.", parse_mode="Markdown", reply_markup=keyboard, reply_to_message_id=msg["message_id"])
+
+    elif text.startswith("/addvote"):
+        member = bot.getChatMember(chat_id, msg["from"]["id"])
+        if member["status"] not in ["creator", "administrator"]: return
+
+        options = text.split().pop(0)
+        gen_vote(bot, msg, chat_id, cache_mode)
+
 
 def on_callback_query(msg):
     global cache_mode
@@ -444,7 +454,8 @@ def on_callback_query(msg):
         actual_votes = vote["votes"]
         db.update_data(data)
 
-        text = f"Vota @{msg['message']['reply_to_message']['from']['username']}\n\nVoti: {actual_votes}"
+        name = f"@{msg['message']['reply_to_message']['from'].get('username')}" if msg['message']['reply_to_message']['from'].get('username') else msg['message']['reply_to_message']['from']['first_name']
+        text = f"Vota {name}\n\nVoti: {actual_votes}"
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
         bot.editMessageText((msg["message"]["chat"]["id"], msg["message"]["message_id"]), text, reply_markup=keyboard)
