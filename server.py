@@ -426,6 +426,7 @@ def on_chat_message(msg):
 
 
 def on_callback_query(msg):
+
     global cache_mode
     query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
 
@@ -433,7 +434,9 @@ def on_callback_query(msg):
 
     if query_data == "vote":
 
-        if from_id == msg["message"]["reply_to_message"]["from"]["id"]:
+        return bot.answerCallbackQuery(query_id, text="Le votazioni sono terminate!", show_alert=True)
+
+        """if from_id == msg["message"]["reply_to_message"]["from"]["id"]:
             return bot.answerCallbackQuery(query_id, text="Non puoi votarti da solo!", show_alert=True)
 
         data = db.get_data()
@@ -458,7 +461,7 @@ def on_callback_query(msg):
         text = f"Vota {name}\n\nVoti: {actual_votes}"
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Vota', callback_data='vote')]])
-        bot.editMessageText((msg["message"]["chat"]["id"], msg["message"]["message_id"]), text, reply_markup=keyboard)
+        bot.editMessageText((msg["message"]["chat"]["id"], msg["message"]["message_id"]), text, reply_markup=keyboard)"""
 
     elif query_data in ["mode_default", "mode_testo", "mode_media"]:
 
